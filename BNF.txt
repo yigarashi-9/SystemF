@@ -1,0 +1,41 @@
+
+<termBody>
+ := <lambdaAbst>
+  | <lambdaApp>
+  | <typeAbst>
+  | <typeApp>
+
+<lambdaAbst>
+ := "\" <var> <typeAnnotation>opt <termBody>
+
+<typeAnnotation>
+ := <typeUnit>
+  | <typeUnit> "->" <typeAnnotation>
+
+<typeUnit>
+ := "Bool"
+  | "(" <tyAnnot> ")"
+
+<lambdaApp>
+ := <unit>*
+
+<unit>
+ := <termIf>
+  | "true"
+  | "false"
+  | <var>
+
+<termIf>
+ := "if" <termBody> "then" <termBody> "else" <termBody>
+
+<typeAbst>
+ := "\" <tyVar> <termBody>
+
+<typeApp>
+ := <termBody> "[" <tyVar> "]"
+
+<var>
+ := lower char
+
+<tyVar>
+ := upper char
