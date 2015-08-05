@@ -1,5 +1,10 @@
+{-# LANGUAGE DeriveGeneric #-}
 
 module Syntax where
+
+import GHC.Generics
+import Data.Aeson
+import qualified Data.ByteString.Lazy.Char8 as LBS
 
 type Check = Either String
 
@@ -9,7 +14,7 @@ data Term = TmTrue
           | TmVar   Int Char
           | TmAbs   Char TyTerm Term
           | TmApp   Term Term
-          deriving(Eq)
+          deriving(Eq, Generic)
 
 instance Show Term where
     show TmTrue         = "true"
@@ -19,10 +24,18 @@ instance Show Term where
     show (TmAbs c ty t) = concat ["(\\", [c], " ", show t, ")"]
     show (TmApp a b)    = show a ++  " " ++ show b
 
+instance ToJSON Term
+
+
 data TyTerm = TyArr TyTerm TyTerm
             | TyBool
-            deriving(Eq)
+            deriving(Eq, Generic)
 
 instance Show TyTerm where
     show (TyArr t1 t2) = show t1 ++ " -> " ++ show t2
     show TyBool        = "Bool"
+
+instance ToJSON TyTerm
+
+astToJson :: Term -> String
+astToJson = LBS.unpack . encode
