@@ -19,7 +19,10 @@ def term(ast):
         return TmAbs(cnt[0], ty(cnt[1]), term(cnt[2]))
     elif tag == 'TmApp':
         return TmApp(term(cnt[0]), term(cnt[1]))
-
+    elif tag == 'TmTyAbs':
+        return TmTyAbs(cnt[0], term(cnt[1]))
+    elif tag == 'TmTyApp':
+        return TmTyApp(term(cnt[0]), ty(cnt[1]))
 
 def ty(ast):
     """JSON 形式の AST の型部分を変換する"""
@@ -30,3 +33,5 @@ def ty(ast):
         return TyBool()
     elif tag == 'TyArr':
         return TyArr(ty(cnt[0]), ty(cnt[1]))
+    elif tag == 'TyVar':
+        return TyVar(cnt[0], cnt[1])

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-class TyArr(object):
+from .node import *
+
+class TyArr(Node):
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -14,9 +16,33 @@ class TyArr(object):
             return False
 
 
-class TyBool(object):
+class TyBool(Node):
     def __str__(self):
         return "Bool"
 
     def __eq__(self, other):
         return isinstance(other, TyBool)
+
+
+class TyVar(Node):
+    def __init__(self, var, index):
+        self.var = var
+        self.index = index
+
+    def __str__(self):
+        return str(self.var) + ":" + str(self.index)
+
+    def __eq__(self, other):
+        return isinstance(other, TyVar) and self.index == other.index
+
+
+class TyAll(Node):
+    def __init__(self, parm, ty):
+        self.parm = parm
+        self.ty = ty
+
+    def __eq__(self, other):
+        return isinstance(other, TyAll) and self.ty == other.ty
+
+    def __str__(self):
+        return "forall " + str(self.parm) + "." + str(self.ty)

@@ -1,15 +1,5 @@
 # -*- coding: utf-8 -*-
-class Node(object):
-    """ASTノードの抽象クラス"""
-
-    def accept(self, visitor):
-        """accept 側のノードに応じて， visitor 側のメソッドが選択される"""
-        return self._accept(self.__class__, visitor)
-
-    def _accept(self, klass, visitor):
-        method = getattr(visitor, klass.__name__.lower(), None)
-        return method(self)
-
+from .node import *
 
 class TmTrue(Node):
     def __str__(self):
@@ -59,3 +49,21 @@ class TmApp(Node):
 
     def __str__(self):
         return str(self.exp_l) + " " + str(self.exp_r)
+
+
+class TmTyAbs(Node):
+    def __init__(self, var, body):
+        self.var = var
+        self.body = body
+
+    def __str__(self):
+        return "(\\" + self.var + " " + str(self.body) + ")"
+
+
+class TmTyApp(Node):
+    def __init__(self, tm, ty):
+        self.tm = tm
+        self.ty = ty
+
+    def __str__(self):
+        return str(self.tm) + " [" + str(self.ty) + "]"
