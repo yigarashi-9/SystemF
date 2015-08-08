@@ -14,6 +14,8 @@ data Term = TmTrue
           | TmVar   Int Char
           | TmAbs   Char TyTerm Term
           | TmApp   Term Term
+          | TmTyAbs Char Term
+          | TmTyApp Term TyTerm
           deriving(Eq, Generic)
 
 instance Show Term where
@@ -23,17 +25,21 @@ instance Show Term where
     show (TmVar _ s)    = [s]
     show (TmAbs c ty t) = concat ["(\\", [c], " ", show t, ")"]
     show (TmApp a b)    = show a ++  " " ++ show b
+    show (TmTyAbs c t)  = concat ["(\\", [c], " ", show t, ")"]
+    show (TmTyApp t ty) = concat [show t, " [", show ty, "]"]
 
 instance ToJSON Term
 
 
 data TyTerm = TyArr TyTerm TyTerm
             | TyBool
+            | TyVar Char Int
             deriving(Eq, Generic)
 
 instance Show TyTerm where
     show (TyArr t1 t2) = show t1 ++ " -> " ++ show t2
     show TyBool        = "Bool"
+    show (TyVar c i)   = show c ++ ":" ++ show i
 
 instance ToJSON TyTerm
 

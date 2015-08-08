@@ -14,6 +14,7 @@
 
 <typeUnit>
  := "Bool"
+  | <tyVar>
   | "(" <tyAnnot> ")"
 
 <lambdaApp>
@@ -24,6 +25,7 @@
   | "true"
   | "false"
   | <var>
+  | "(" <termBody> ")"
 
 <termIf>
  := "if" <termBody> "then" <termBody> "else" <termBody>
@@ -32,7 +34,11 @@
  := "\" <tyVar> <termBody>
 
 <typeApp>
- := <termBody> "[" <tyVar> "]"
+ := <typeAppUnit> "[" <tyVar> "]"
+
+<typeAppUnit>
+ := "(" <termBody> ")"
+  | <lambdaApp>
 
 <var>
  := lower char

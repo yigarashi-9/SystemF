@@ -19,3 +19,4 @@ cabal.sandbox.config
 *.asm
 *.c
 *.sh
+__pycache__/
