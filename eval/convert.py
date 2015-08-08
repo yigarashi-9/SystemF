@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from eval.ty import *
-from eval.term import *
+from .ty import *
+from .term import *
 
 def term(ast):
     """JSON 形式の AST をクラスに変換する"""

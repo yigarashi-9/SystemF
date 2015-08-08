@@ -1,19 +1,13 @@
-
+# -*- coding: utf-8 -*-
 import subprocess
-import json
-from eval import convert
 from eval import typing
-from eval import eval
+from eval import execute
 
 def driver_loop():
     while(1):
         try:
-            expr = input('> ')
-            json_txt = subprocess.check_output(['stack', 'exec', 'parse', expr])
-            ast_dict = json.loads(json_txt.decode(('utf-8')))
-            ast = convert.term(ast_dict)
-            ty  = ast.accept(typing.Typing())
-            res = ast.accept(eval.Eval())
+            expr = input("> ")
+            (res, ty) = execute.systemf_repl(expr)
             print("{0} : {1}".format(res, ty))
         except subprocess.CalledProcessError as err:
             pass

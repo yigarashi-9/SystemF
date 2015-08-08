@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
-from eval.ty import *
-from eval.term import *
+from .ty import *
+from .term import *
 
 class Eval(object):
     """項の評価を行う visitor"""
@@ -28,6 +28,7 @@ class Eval(object):
         n_exp_l = node.exp_l.accept(self)
         n_exp_r = node.exp_r.accept(self)
         if isinstance(n_exp_l, TmAbs):
+            n_exp_r.accept(Shift(1))
             res = n_exp_l.body.accept(Subst(n_exp_r))
             res.accept(Shift(-1))
             return res.accept(self)

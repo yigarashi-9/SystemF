@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from eval.ty import *
-from eval.term import *
+from .ty import *
+from .term import *
 
 class Typing(object):
     """型検査を行うための visitor"""
@@ -30,7 +30,9 @@ class Typing(object):
 
     def tmabs(self, node):
         self.table.append(node.ty)
-        return TyArr(node.ty, node.body.accept(self))
+        res = TyArr(node.ty, node.body.accept(self))
+        self.table = self.table[:-1]
+        return res
 
     def tmapp(self, node):
         ty_l = node.exp_l.accept(self)
