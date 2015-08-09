@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 from .node import *
 
 class TyArr(Node):
@@ -46,3 +47,45 @@ class TyAll(Node):
 
     def __str__(self):
         return "forall " + str(self.parm) + "." + str(self.ty)
+
+
+class TyManip(object):
+    """型を操作するための acceptor"""
+    def tybool(self, ty):
+        return TyBool()
+
+    def tyarr(self, ty):
+        n_ty_l = ty.left.accept(self)
+        n_ty_r = ty.right.accept(self)
+        return TyArr(n_ty_l, n_ty_r)
+
+    def tyall(self, ty):
+        n_ty = ty.ty.accept(self)
+        return TyAll(ty.parm, n_ty)
+
+
+class Replace(TyManip):
+    """型代入で変数を置き換えるための visitor"""
+    def __init__(self, depth, src):
+        self.depth = depth
+        self.src = src
+
+    def tyvar(self, ty):
+        """項の評価と違って，型検査は抽象の内側から評価が始まる場合もあるので
+           現在の深さを記録して代入するべきインデックスを追いかける
+        """
+        if ty.index == self.depth:
+            return copy.deepcopy(self.src)
+        else:
+            return copy.deepcopy(ty)
+
+
+class Update(TyManip):
+    """型代入時に型の中のパラメータをシフトするための visitor"""
+    def __init__(self, shamt):
+        self.shamt = shamt
+
+    def tyvar(self, ty):
+        n_ty = copy.deepcopy(ty)
+        n_ty.index += self.shamt
+        return n_ty
