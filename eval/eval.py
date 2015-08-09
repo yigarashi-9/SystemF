@@ -42,7 +42,6 @@ class Eval(object):
 
     def tmtyapp(self, node):
         n_tm = node.tm.accept(self)
-        print(n_tm)
         if isinstance(n_tm, TmTyAbs):
             n_ty = node.ty.accept(Update(1))
             res = n_tm.body.accept(TySubst(n_ty))
