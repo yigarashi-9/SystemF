@@ -109,10 +109,19 @@ term c = do
   eof >> (return t)
 
 termBody :: Context -> Parser Term
-termBody c =  try (tyApp c)
-          <|> try (abst c)
-          <|> try (app c)
-          <|> tyAbst c
+termBody c =  try (abst c)
+          <|> try (tyAbst c)
+          <|> generalApp c
+
+generalApp :: Context -> Parser Term
+generalApp c = unit c >>= appChain c
+
+appChain :: Context -> Term -> Parser Term
+appChain c t =  try (do t' <- unit c
+                        appChain c (TmApp t t'))
+            <|> try (do t' <- brackets (tyAnnot c)
+                        appChain c (TmTyApp t t'))
+            <|> return t
 
 abst :: Context -> Parser Term
 abst c = do
@@ -130,9 +139,6 @@ tyunit c =  try (symbol "Bool" >> return TyBool)
         <|> try (parens $ tyAnnot c)
         <|> do v <- tyVar
                return $ TyVar v (tyIndex c v)
-
-app :: Context -> Parser Term
-app c = unit c `chainl1` (return TmApp)
 
 unit :: Context -> Parser Term
 unit c =  termif c
@@ -154,13 +160,3 @@ tyAbst c = do
   v  <- (reservedOp "\\") >> tyVar
   t  <- termBody (updateTyCtx c v)
   return $ TmTyAbs v t
-
-tyAppUnit :: Context -> Parser Term
-tyAppUnit c =  try (app c)
-           <|> parens (termBody c)
-
-tyApp :: Context -> Parser Term
-tyApp c = do
-  t  <- tyAppUnit c
-  ty <- many1 (brackets (tyAnnot c))
-  return $ foldl TmTyApp t ty
