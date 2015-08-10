@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import copy
 from .node import *
+from .ty   import *
 
 class TmTrue(Node):
     def __str__(self):
@@ -67,3 +69,114 @@ class TmTyApp(Node):
 
     def __str__(self):
         return str(self.tm) + " [" + str(self.ty) + "]"
+
+
+class TmManip(object):
+    def tmvar(self, node):
+        """派生クラスで実装"""
+        pass
+
+    def tmabs(self, node):
+        """派生クラスで実装"""
+        pass
+
+    def tmtyapp(self, node):
+        """派生クラスで実装"""
+        pass
+
+    def tmtrue(self, node):
+        return TmTrue()
+
+    def tmfalse(self, node):
+        return TmFalse()
+
+    def tmif(self, node):
+        n_cond = node.cond.accept(self)
+        n_true = node.true.accept(self)
+        n_false = node.false.accept(self)
+        return TmIf(n_cond, n_true, n_false)
+
+    def tmapp(self, node):
+        n_exp_l = node.exp_l.accept(self)
+        n_exp_r = node.exp_r.accept(self)
+        return TmApp(n_exp_l, n_exp_r)
+
+    def tmtyabs(self, node):
+        n_body = node.body.accept(self)
+        return TmTyAbs(node.var, n_body)
+
+
+class TmSubst(TmManip):
+    """値の代入を行う visitor"""
+    def __init__(self, src):
+        self.src = src
+
+    def tmvar(self, node):
+        if node.index == 0:
+            return copy.deepcopy(self.src)
+        else:
+            return node
+
+    def tmabs(self, node):
+        self.src.accept(TmShift(1))
+        n_body = node.body.accept(self)
+        self.src.accept(TmShift(-1))
+        return TmAbs(node.var, node.ty, n_body)
+
+    def tmtyapp(self, node):
+        n_tm = node.tm.accept(self)
+        return TmTyApp(n_tm, node.ty)
+
+
+class TmShift(TmManip):
+    """値の代入に必要なシフト操作を行う visitor"""
+    def __init__(self, shamt):
+        self.shamt = shamt
+
+    def tmvar(self, node):
+        node.index += self.shamt
+        return node
+
+    def tmabs(self, node):
+        n_body = node.body.accept(self)
+        return TmAbs(node.var, node.ty, n_body)
+
+    def tmtyapp(self, node):
+        n_tm = node.tm.accept(self)
+        return TmTyApp(n_tm, node.ty)
+
+
+class TySubst(TmManip):
+    """型代入のために項を走査する visitor"""
+    def __init__(self, src):
+        self.src = src
+
+    def tmvar(self, node):
+        return node
+
+    def tmabs(self, node):
+        res = node.ty.accept(TyVarSubst(0, self.src))
+        return TmAbs(node.var, res, node.body.accept(self))
+
+    def tmtyapp(self, node):
+        res = node.ty.accept(TyVarSubst(0, self.src))
+        return TmTyApp(node.tm.accept(self), res)
+
+
+class TyShift(TmManip):
+    """型代入に必要なインデックスのシフトを行う visitor"""
+    def __init__(self, shamt):
+        self.shamt = shamt
+
+    def tmvar(self, node):
+        return node
+
+    def tmabs(self, node):
+        n_ty   = node.ty.accept(TyVarShift(self.shamt))
+        n_body = node.body.accept(self)
+        return TmAbs(node.var, n_ty, n_body)
+
+    def tmtyapp(self, node):
+        n_ty = node.ty.accept(TyVarShift(self.shamt))
+        n_tm = node.tm.accept(self)
+        return TmTyApp(n_tm, n_ty)

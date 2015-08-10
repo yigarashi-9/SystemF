@@ -35,3 +35,5 @@ class TestRepl(unittest.TestCase):
     def test_polymorphism(self):
         self.assertTrue(systemf_eval("(\\X (\\x:X x)) [Bool] true"),
                         (TmTrue(), TyBool()))
+        self.assertTrue(systemf_eval("(\\X (\\Y (\\x:Y x)) [X->X]) [Bool] (\\x:Bool x)"),
+                        (TmAbs('x', TyBool(), TyVar(0, 'x')), TyArr(TyBool(), TyBool())))

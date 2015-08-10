@@ -53,8 +53,7 @@ class Typing(object):
         ty_l = node.tm.accept(self)
         if isinstance(ty_l, TyAll):
             src = node.ty.accept(TyVarShift(1))
-            n_ty_l = ty_l.ty.accept(TyVarSubst(self.depth, src))
-            return n_ty_l.accept(TyVarShift(-1))
+            return ty_l.ty.accept(TyVarSubst(self.depth, src)).accept(TyVarShift(-1))
         else:
             TypingError('tyapp')
 
