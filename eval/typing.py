@@ -52,9 +52,9 @@ class Typing(object):
     def tmtyapp(self, node):
         ty_l = node.tm.accept(self)
         if isinstance(ty_l, TyAll):
-            src = node.ty.accept(Update(1))
-            n_ty_l = ty_l.ty.accept(Replace(self.depth, src))
-            return n_ty_l.accept(Update(-1))
+            src = node.ty.accept(TyVarShift(1))
+            n_ty_l = ty_l.ty.accept(TyVarSubst(self.depth, src))
+            return n_ty_l.accept(TyVarShift(-1))
         else:
             TypingError('tyapp')
 

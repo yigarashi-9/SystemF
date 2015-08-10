@@ -49,8 +49,8 @@ class TyAll(Node):
         return "forall " + str(self.parm) + "." + str(self.ty)
 
 
-class TyManip(object):
-    """型を操作するための acceptor"""
+class TyVarManip(object):
+    """型変数を操作するための acceptor"""
     def tybool(self, ty):
         return TyBool()
 
@@ -64,7 +64,7 @@ class TyManip(object):
         return TyAll(ty.parm, n_ty)
 
 
-class Replace(TyManip):
+class TyVarSubst(TyVarManip):
     """型代入で変数を置き換えるための visitor"""
     def __init__(self, depth, src):
         self.depth = depth
@@ -80,7 +80,7 @@ class Replace(TyManip):
             return copy.deepcopy(ty)
 
 
-class Update(TyManip):
+class TyVarShift(TyVarManip):
     """型代入時に型の中のパラメータをシフトするための visitor"""
     def __init__(self, shamt):
         self.shamt = shamt

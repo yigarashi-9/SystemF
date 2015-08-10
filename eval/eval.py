@@ -32,7 +32,7 @@ class Eval(object):
         if isinstance(n_exp_l, TmAbs):
             n_exp_r.accept(TmShift(1))
             res = n_exp_l.body.accept(TmSubst(n_exp_r))
-            res.accept(Shift(-1))
+            res.accept(TmShift(-1))
             return res.accept(self)
         else:
             return TmApp(n_exp_l, n_exp_r)
@@ -43,7 +43,7 @@ class Eval(object):
     def tmtyapp(self, node):
         n_tm = node.tm.accept(self)
         if isinstance(n_tm, TmTyAbs):
-            n_ty = node.ty.accept(Update(1))
+            n_ty = node.ty.accept(TyVarShift(1))
             res = n_tm.body.accept(TySubst(n_ty))
             res.accept(TyShift(-1))
             return res.accept(self)
@@ -83,28 +83,28 @@ class TmShift(Shift):
 
 
 class TySubst(Subst):
-    """型代入を行う visitor"""
+    """型代入のために項を走査する visitor"""
     def tmvar(self, node):
         return node
 
     def tmabs(self, node):
-        res = node.ty.accept(Replace(0, self.src))
+        res = node.ty.accept(TyVarSubst(0, self.src))
         return TmAbs(node.var, res, node.body.accept(self))
 
     def tmtyapp(self, node):
-        res = node.ty.accept(Replace(0, self.src))
+        res = node.ty.accept(TyVarSubst(0, self.src))
         return TmTyApp(node.tm.accept(self), res)
 
 
 class TyShift(Shift):
-    """型代入に必要な型のインデックスのシフトを行う visitor"""
+    """型代入に必要なインデックスのシフトを行う visitor"""
     def tmvar(self, node):
         pass
 
     def tmabs(self, node):
-        node.ty = node.ty.accept(Update(self.shamt))
+        node.ty = node.ty.accept(TyVarShift(self.shamt))
         node.body.accept(self)
 
     def tmtyapp(self, node):
-        node.ty = node.ty.accept(Update(self.shamt))
+        node.ty = node.ty.accept(TyVarShift(self.shamt))
         node.tm.accept(self)

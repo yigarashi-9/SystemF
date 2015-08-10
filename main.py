@@ -7,7 +7,7 @@ def driver_loop():
     while(1):
         try:
             expr = input("> ")
-            (res, ty) = execute.systemf_repl(expr)
+            (res, ty) = execute.systemf_eval(expr)
             print("{0} : {1}".format(res, ty))
         except subprocess.CalledProcessError as err:
             pass
