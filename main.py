@@ -8,7 +8,7 @@ def driver_loop():
         try:
             expr = input("> ")
             (res, ty) = execute.systemf_eval(expr)
-            print("{0} : {1}".format(res, ty))
+            print("{0} :: {1}".format(ty, res))
         except subprocess.CalledProcessError as err:
             pass
         except typing.TypingError as err:
