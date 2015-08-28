@@ -31,7 +31,7 @@ class TmVar(Node):
         self.char  = char
 
     def __str__(self):
-        return str(self.index) + ":" + self.char
+        return self.char
 
 
 class TmAbs(Node):

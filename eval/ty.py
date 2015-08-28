@@ -31,7 +31,7 @@ class TyVar(Node):
         self.index = index
 
     def __str__(self):
-        return str(self.var) + ":" + str(self.index)
+        return str(self.var)
 
     def __eq__(self, other):
         return isinstance(other, TyVar) and self.index == other.index
