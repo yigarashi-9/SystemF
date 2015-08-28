@@ -3,21 +3,10 @@
  := <lambdaAbst>
   | <typeAbst>
   | <generalApp>
+  | <termIf>
 
 <lambdaAbst>
  := "\" <var> <typeAnnotation>opt <termBody>
-
-<typeAnnotation>
- := <typeUnit>
-  | <typeUnit> "->" <typeAnnotation>
-
-<typeUnit>
- := "Bool"
-  | <tyVar>
-  | "(" <tyAnnot> ")"
-
-<termIf>
- := "if" <termBody> "then" <termBody> "else" <termBody>
 
 <typeAbst>
  := "\" <tyVar> <termBody>
@@ -31,14 +20,34 @@
   | EOL
 
 <unit>
- := <termIf>
-  | "true"
+ := "true"
   | "false"
   | <var>
   | "(" <termBody> ")"
+  | <unit> "." <identifier>
+  | "{" <termRecord> "," .. <termRecord> "}"
+
+<termIf>
+ := "if" <termBody> "then" <termBody> "else" <termBody>
 
 <var>
  := lower char
+
+<typeAnnotation>
+ := <typeUnit>
+  | <typeUnit> "->" <typeAnnotation>
+
+<typeUnit>
+ := "Bool"
+  | <tyVar>
+  | "(" <typeAnnot> ")"
+  | "{" <typeRecord> "}"
+
+<typeRecords>
+ := "{" <typeRecord> ("," <typeRecords>)opt "}"
+
+<typeRecord>
+ := <identifier> ":" <typeAnnotation>
 
 <tyVar>
  := upper char

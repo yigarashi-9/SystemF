@@ -16,6 +16,8 @@ data Term = TmTrue
           | TmApp   Term Term
           | TmTyAbs Char Term
           | TmTyApp Term TyTerm
+          | TmRcd   [(String, Term)]
+          | TmProj  Term String
           deriving(Eq, Generic)
 
 instance Show Term where
@@ -34,6 +36,7 @@ instance ToJSON Term
 data TyTerm = TyArr TyTerm TyTerm
             | TyBool
             | TyVar Char Int
+            | TyRcd [(String, TyTerm)]
             deriving(Eq, Generic)
 
 instance Show TyTerm where

@@ -8,6 +8,8 @@ import           Text.Parsec.String
 import qualified Text.Parsec.Token as P
 import           Text.Parsec.Language
 import           Data.Char
+import           Control.Monad
+import           Control.Applicative((<*))
 
 {- --------------------------------------------------------
                インデックスを付けるための機構
@@ -96,6 +98,9 @@ parens = P.parens lexer
 brackets :: forall a. Parser a -> Parser a
 brackets = P.brackets lexer
 
+braces :: forall a. Parser a -> Parser a
+braces = P.braces lexer
+
 whiteSpace :: Parser ()
 whiteSpace = P.whiteSpace lexer
 
@@ -111,7 +116,8 @@ term c = do
 termBody :: Context -> Parser Term
 termBody c =  try (abst c)
           <|> try (tyAbst c)
-          <|> generalApp c
+          <|> try (generalApp c)
+          <|> termif c
 
 generalApp :: Context -> Parser Term
 generalApp c = unit c >>= appChain c
@@ -131,22 +137,20 @@ abst c = do
   case ty of Just ty' -> return $ TmAbs a ty' t
              Nothing  -> fail "annotate type"
 
-tyAnnot :: Context -> Parser TyTerm
-tyAnnot c = tyunit c `chainl1` (reservedOp "->" >> return TyArr)
-
-tyunit :: Context -> Parser TyTerm
-tyunit c =  try (symbol "Bool" >> return TyBool)
-        <|> try (parens $ tyAnnot c)
-        <|> do v <- tyVar
-               return $ TyVar v (tyIndex c v)
-
 unit :: Context -> Parser Term
-unit c =  termif c
-      <|> parens (termBody c)
-      <|> try (symbol "true"  >> return TmTrue)
-      <|> try (symbol "false" >> return TmFalse)
-      <|> do a <- var
-             return $ TmVar (index c a) a
+unit c =  try (liftM2 TmProj (unit_rec c <* symbol ".") identifier)
+      <|> unit_rec c
+
+unit_rec :: Context -> Parser Term
+unit_rec c =  parens (termBody c)
+          <|> try (liftM TmRcd (braces $ record c `sepBy1` symbol ","))
+          <|> try (symbol "true"  >> return TmTrue)
+          <|> try (symbol "false" >> return TmFalse)
+          <|> do a <- var
+                 return $ TmVar (index c a) a
+
+record :: Context -> Parser (String, Term)
+record c = liftM2 (,) (identifier <* symbol "=") (termBody c)
 
 termif :: Context -> Parser Term
 termif c = do
@@ -154,6 +158,19 @@ termif c = do
   t <- try (symbol "then") >> termBody c
   f <- try (symbol "else") >> termBody c
   return $ TmIf p t f
+
+tyAnnot :: Context -> Parser TyTerm
+tyAnnot c = tyunit c `chainl1` (reservedOp "->" >> return TyArr)
+
+tyunit :: Context -> Parser TyTerm
+tyunit c =  try (symbol "Bool" >> return TyBool)
+        <|> try (parens $ tyAnnot c)
+        <|> try (liftM TyRcd (braces $ tyRecord c `sepBy1` symbol ","))
+        <|> do v <- tyVar
+               return $ TyVar v (tyIndex c v)
+
+tyRecord :: Context -> Parser (String, TyTerm)
+tyRecord c = liftM2 (,) (identifier <* symbol ":") (tyAnnot c)
 
 tyAbst :: Context -> Parser Term
 tyAbst c = do
