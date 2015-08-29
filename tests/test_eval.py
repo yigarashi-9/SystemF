@@ -62,3 +62,9 @@ class TestRepl(unittest.TestCase):
         self.assertEqual(systemf_eval(longcase1),
                          (TyRcd({'z':TyBool()}),
                           TmRcd({'y':TmTrue(), 'z':TmFalse()})))
+
+    def test_join_meet(self):
+        longcase1 = "if true then {x=true, y=false} else {y=true, z=true}"
+        self.assertEqual(systemf_eval(longcase1),
+                         (TyRcd({'y':TyBool()}),
+                          TmRcd({'x':TmTrue(), 'y':TmFalse()})))
