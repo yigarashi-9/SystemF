@@ -38,7 +38,7 @@ class Typing(object):
     def tmapp(self, node):
         ty_l = node.exp_l.accept(self)
         ty_r = node.exp_r.accept(self)
-        if isinstance(ty_l, TyArr) and ty_l.left == ty_r:
+        if isinstance(ty_l, TyArr) and subtype(ty_r, ty_l.left):
             return ty_l.right
         else:
             raise TypingError("app")
@@ -66,6 +66,20 @@ class Typing(object):
             return ty_rcd.rcd[node.label]
         else:
             TypingError('tmproj')
+
+
+def subtype(ty_s, ty_t):
+    """ty_s が ty_t の部分型であるかどうかをチェックする"""
+    if isinstance(ty_t, TyTop):
+        return True
+    elif isinstance(ty_s, TyBool) and isinstance(ty_t, TyBool):
+        return True
+    elif isinstance(ty_s, TyArr) and isinstance(ty_t, TyArr):
+        return subtype(ty_t.left, ty_s.left) and subtype(ty_s.right, ty_t.right)
+    elif isinstance(ty_s, TyRcd) and isinstance(ty_t, TyRcd):
+        return all([k in ty_s.rcd and subtype(ty_s.rcd[k], v) for k, v in ty_t.rcd.items()])
+    else:
+        return False
 
 
 class TypingError(Exception):

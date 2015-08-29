@@ -51,3 +51,14 @@ class TestRepl(unittest.TestCase):
                          (TyBool(), TmTrue()))
         self.assertEqual(systemf_eval("(\\X (\\x:{y:X} x.y)) [Bool] {y=true}"),
                          (TyBool(), TmTrue()))
+
+    def test_subtype(self):
+        self.assertEqual(systemf_eval("(\\x:{y:Bool} x.y) {y=true, z=false}"),
+                         (TyBool(), TmTrue()))
+        self.assertEqual(systemf_eval("(\\x:Top x) true"),
+                         (TyTop(), TmTrue()))
+
+        longcase1 = "(\\x:{y:Bool} -> {z:Bool} x {y=true}) (\\x:Top {y=true, z=false})"
+        self.assertEqual(systemf_eval(longcase1),
+                         (TyRcd({'z':TyBool()}),
+                          TmRcd({'y':TmTrue(), 'z':TmFalse()})))
