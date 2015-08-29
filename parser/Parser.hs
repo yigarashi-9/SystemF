@@ -138,7 +138,7 @@ abst c = do
              Nothing  -> fail "annotate type"
 
 unit :: Context -> Parser Term
-unit c =  try (liftM2 TmProj (unit_rec c <* symbol ".") identifier)
+unit c =  try (liftM2 (foldl TmProj) (unit_rec c) (many $ symbol "." >> identifier))
       <|> unit_rec c
 
 unit_rec :: Context -> Parser Term
