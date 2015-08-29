@@ -42,3 +42,13 @@ class Eval(object):
             return n_tm.body.accept(TySubst(n_ty)).accept(TyShift(-1)).accept(self)
         else:
             return TmTyApp(n_tm, node.ty)
+
+    def tmrcd(self, node):
+        return TmRcd({ k:v.accept(self) for k, v in node.rcd.items() })
+
+    def tmproj(self, node):
+        n_rcd = node.tmrcd.accept(self)
+        if isinstance(n_rcd, TmRcd):
+            return n_rcd.rcd[node.label]
+        else:
+            return TmProj(n_rcd, node.label)

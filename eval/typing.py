@@ -57,6 +57,16 @@ class Typing(object):
         else:
             TypingError('tyapp')
 
+    def tmrcd(self, node):
+        return TyRcd({ k:v.accept(self) for k, v in node.rcd.items()})
+
+    def tmproj(self, node):
+        ty_rcd = node.tmrcd.accept(self)
+        if isinstance(ty_rcd, TyRcd) and node.label in ty_rcd.rcd:
+            return ty_rcd.rcd[node.label]
+        else:
+            TypingError('tmproj')
+
 
 class TypingError(Exception):
     def __init__(self, tag):

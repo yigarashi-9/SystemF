@@ -12,7 +12,7 @@ class TyArr(Node):
 
     def __eq__(self, other):
         if isinstance(other, TyArr):
-            return self.left == other.left and self.right == other.right
+            return self.left ==  other.left and self.right == other.right
         else:
             return False
 
@@ -49,6 +49,18 @@ class TyAll(Node):
         return "forall " + str(self.parm) + "." + str(self.ty)
 
 
+class TyRcd(Node):
+    def __init__(self, rcd):
+        self.rcd = rcd
+
+    def __str__(self):
+        body = ", ".join(map(lambda v: str(v[0]) + ":" + str(v[1]), self.rcd.items()))
+        return "{" + body + "}"
+
+    def __eq__(self, other):
+        return isinstance(other, TyRcd) and dict_eq(self.rcd, other.rcd)
+
+
 class TyVarManip(object):
     """型変数を操作するための acceptor"""
     def tybool(self, ty):
@@ -62,6 +74,9 @@ class TyVarManip(object):
     def tyall(self, ty):
         n_ty = ty.ty.accept(self)
         return TyAll(ty.parm, n_ty)
+
+    def tyrcd(self, ty):
+        return TyRcd( { k:v.accept(self) for k, v in ty.rcd.items() })
 
 
 class TyVarSubst(TyVarManip):

@@ -7,11 +7,15 @@ class TmTrue(Node):
     def __str__(self):
         return "true"
 
+    def __eq__(self, other):
+        return isinstance(other, TmTrue)
 
 class TmFalse(Node):
     def __str__(self):
         return "false"
 
+    def __eq__(self, other):
+        return isinstance(other, TmFalse)
 
 class TmIf(Node):
     def __init__(self, cond, true, false):
@@ -24,6 +28,9 @@ class TmIf(Node):
                " then " + str(self.true) + \
                " else " + str(self.false)
 
+    def __eq__(self, other):
+        return isinstance(other, TmIf) and self.cond == other.cond and \
+               self.true == other.true and self.false == other.false
 
 class TmVar(Node):
     def __init__(self, index, char):
@@ -33,6 +40,8 @@ class TmVar(Node):
     def __str__(self):
         return self.char
 
+    def __eq__(self, other):
+        return isinstance(other, TmVar) and self.index == other.index
 
 class TmAbs(Node):
     def __init__(self, var, ty, body):
@@ -43,6 +52,9 @@ class TmAbs(Node):
     def __str__(self):
         return "(\\" + self.var + ":" + str(self.ty) + " " + str(self.body) + ")"
 
+    def __eq__(self, other):
+        return isinstance(other, TmAbs) and \
+               self.ty == other.ty and self.body == other.body
 
 class TmApp(Node):
     def __init__(self, exp_l, exp_r):
@@ -52,6 +64,9 @@ class TmApp(Node):
     def __str__(self):
         return str(self.exp_l) + " " + str(self.exp_r)
 
+    def __eq__(self, other):
+        return isinstance(other, TmApp) and \
+               self.exp_l == other.exp_l and self.exp_r == self.exp_r
 
 class TmTyAbs(Node):
     def __init__(self, var, body):
@@ -61,6 +76,8 @@ class TmTyAbs(Node):
     def __str__(self):
         return "(\\" + self.var + " " + str(self.body) + ")"
 
+    def __eq__(self, other):
+        return isinstance(other, TmTyAbs) and self.body == other.body
 
 class TmTyApp(Node):
     def __init__(self, tm, ty):
@@ -69,6 +86,29 @@ class TmTyApp(Node):
 
     def __str__(self):
         return str(self.tm) + " [" + str(self.ty) + "]"
+
+    def __eq__(self, other):
+        return isinstance(other, TmTyApp) and \
+               self.tm == other.tm and self.ty == other.tm
+
+class TmRcd(Node):
+    def __init__(self, rcd):
+        self.rcd = rcd
+
+    def __str__(self):
+        body = ", ".join(map(lambda v: str(v[0]) + "=" + str(v[1]), self.rcd.items()))
+        return "{" + body + "}"
+
+    def __eq__(self, other):
+        return isinstance(other, TmRcd) and dict_eq(self.rcd, other.rcd)
+
+class TmProj(Node):
+    def __init__(self, tmrcd, label):
+        self.tmrcd = tmrcd
+        self.label = label
+
+    def __str__(self):
+        return str(self.tmrcd) + "." + str(self.label)
 
 
 class TmManip(object):
@@ -104,6 +144,12 @@ class TmManip(object):
     def tmtyabs(self, node):
         n_body = node.body.accept(self)
         return TmTyAbs(node.var, n_body)
+
+    def tmrcd(self, node):
+        return TmRcd({ k:v.accept(self) for k, v in node.rcd.items() })
+
+    def tmproj(self, node):
+        return TmProj(node.tmrcd.accept(self), node.label)
 
 
 class TmSubst(TmManip):
