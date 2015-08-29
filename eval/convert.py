@@ -36,6 +36,8 @@ def ty(ast):
 
     if tag == 'TyBool':
         return TyBool()
+    elif tag == 'TyTop':
+        return TyTop()
     elif tag == 'TyArr':
         return TyArr(ty(cnt[0]), ty(cnt[1]))
     elif tag == 'TyVar':

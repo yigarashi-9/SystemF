@@ -20,29 +20,15 @@ data Term = TmTrue
           | TmProj  Term String
           deriving(Eq, Generic)
 
-instance Show Term where
-    show TmTrue         = "true"
-    show TmFalse        = "false"
-    show (TmIf c t f)   = concat ["if ",show c," then ",show t," else ",show f]
-    show (TmVar _ s)    = [s]
-    show (TmAbs c ty t) = concat ["(\\", [c], " ", show t, ")"]
-    show (TmApp a b)    = show a ++  " " ++ show b
-    show (TmTyAbs c t)  = concat ["(\\", [c], " ", show t, ")"]
-    show (TmTyApp t ty) = concat [show t, " [", show ty, "]"]
-
 instance ToJSON Term
 
 
 data TyTerm = TyArr TyTerm TyTerm
             | TyBool
+            | TyTop
             | TyVar Char Int
             | TyRcd [(String, TyTerm)]
             deriving(Eq, Generic)
-
-instance Show TyTerm where
-    show (TyArr t1 t2) = show t1 ++ " -> " ++ show t2
-    show TyBool        = "Bool"
-    show (TyVar c i)   = show c ++ ":" ++ show i
 
 instance ToJSON TyTerm
 

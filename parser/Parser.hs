@@ -164,6 +164,7 @@ tyAnnot c = tyunit c `chainl1` (reservedOp "->" >> return TyArr)
 
 tyunit :: Context -> Parser TyTerm
 tyunit c =  try (symbol "Bool" >> return TyBool)
+        <|> try (symbol "Top" >> return TyTop)
         <|> try (parens $ tyAnnot c)
         <|> try (liftM TyRcd (braces $ tyRecord c `sepBy1` symbol ","))
         <|> do v <- tyVar

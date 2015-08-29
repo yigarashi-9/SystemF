@@ -25,6 +25,14 @@ class TyBool(Node):
         return isinstance(other, TyBool)
 
 
+class TyTop(Node):
+    def __str__(self):
+        return "Top"
+
+    def __eq__(self, other):
+        return isinstance(other, TyTop)
+
+
 class TyVar(Node):
     def __init__(self, var, index):
         self.var = var
@@ -65,6 +73,9 @@ class TyVarManip(object):
     """型変数を操作するための acceptor"""
     def tybool(self, ty):
         return TyBool()
+
+    def tytop(self, ty):
+        return TyTop()
 
     def tyarr(self, ty):
         n_ty_l = ty.left.accept(self)

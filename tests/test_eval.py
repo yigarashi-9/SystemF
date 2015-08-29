@@ -49,3 +49,5 @@ class TestRepl(unittest.TestCase):
                           TmRcd({'x':TmTrue(), 'y':TmAbs('a', TyBool(), TmVar(0, 'a'))})))
         self.assertEqual(systemf_eval("(\\x:{y:Bool} x.y) {y=true}"),
                          (TyBool(), TmTrue()))
+        self.assertEqual(systemf_eval("(\\X (\\x:{y:X} x.y)) [Bool] {y=true}"),
+                         (TyBool(), TmTrue()))
