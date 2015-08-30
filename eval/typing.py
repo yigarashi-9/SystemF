@@ -101,6 +101,7 @@ def join(ty_s, ty_t):
     else:
         return TyTop()
 
+
 def meet(ty_s, ty_t):
     """交わりを計算する"""
     if isinstance(ty_s, TyTop) or isinstance(ty_t, TyTop):
@@ -125,7 +126,7 @@ def meet(ty_s, ty_t):
                 res[k] = ty_t.rcd[k]
             else:
                 return None
-        return res
+        return TyRcd(res)
     else:
         return None
 

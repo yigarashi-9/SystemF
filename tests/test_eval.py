@@ -68,3 +68,14 @@ class TestRepl(unittest.TestCase):
         self.assertEqual(systemf_eval(longcase1),
                          (TyRcd({'y':TyBool()}),
                           TmRcd({'x':TmTrue(), 'y':TmFalse()})))
+
+        longcase2 = "if true then (\\x:{y:Bool} {z=true}) \
+                     else (\\x:{w:Bool} {a=true, z=x.w})"
+        self.assertEqual(systemf_eval(longcase2),
+                         (TyArr(TyRcd({'y':TyBool(), 'w':TyBool()}),
+                                TyRcd({'z':TyBool()})),
+                          TmAbs('x', TyRcd({'y':TyBool()}), TmRcd({'z':TmTrue()}))))
+
+        longcase3 = "(\\x:{y:{z:Bool}} x.y.z) {y={z=true, w=false}}"
+        self.assertEqual(systemf_eval(longcase3),
+                         (TyBool(), TmTrue()))
